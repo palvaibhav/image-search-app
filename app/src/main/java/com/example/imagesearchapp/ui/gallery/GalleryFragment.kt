@@ -5,8 +5,10 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.View
 import androidx.appcompat.widget.SearchView
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.paging.LoadState
 import com.example.imagesearchapp.R
 import com.example.imagesearchapp.databinding.FragmentGalleryBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -28,14 +30,37 @@ class GalleryFragment : Fragment(R.layout.fragment_gallery) {
 
         binding.apply {
             recyclerView.setHasFixedSize(true)
+            recyclerView.itemAnimator = null
             recyclerView.adapter = adaptor.withLoadStateHeaderAndFooter(
                 header = UnsplashPhotoLoadStateAdapter { adaptor.retry() },
                 footer = UnsplashPhotoLoadStateAdapter { adaptor.retry() }
             )
+            retryButton.setOnClickListener {
+                adaptor.retry()
+            }
         }
 
         viewModel.photos.observe(viewLifecycleOwner) {
             adaptor.submitData(viewLifecycleOwner.lifecycle, it)
+        }
+
+        adaptor.addLoadStateListener { loadState ->
+            binding.apply {
+                progressBarView.isVisible = loadState.source.refresh is LoadState.Loading
+                recyclerView.isVisible = loadState.source.refresh is LoadState.NotLoading
+                retryButton.isVisible = loadState.source.refresh is LoadState.Error
+                errorTextView.isVisible = loadState.source.refresh is LoadState.Error
+
+                // If there are zero search results
+                if (loadState.source.refresh is LoadState.NotLoading
+                    && loadState.append.endOfPaginationReached
+                    && adaptor.itemCount < 1) {
+                    recyclerView.isVisible = false
+                    noResultsTextView.isVisible = true
+                } else {
+                    noResultsTextView.isVisible = false
+                }
+            }
         }
 
         setHasOptionsMenu(true)
