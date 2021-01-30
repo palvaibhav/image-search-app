@@ -11,25 +11,8 @@ import com.example.imagesearchapp.R
 import com.example.imagesearchapp.data.UnsplashPhoto
 import com.example.imagesearchapp.databinding.ItemUnsplashPhotoBinding
 
-class UnsplashPhotoAdaptor :
+class UnsplashPhotoAdaptor(private val listener: OnItemClickListener) :
     PagingDataAdapter<UnsplashPhoto, UnsplashPhotoAdaptor.PhotoViewHolder>(PHOTO_COMPARATOR) {
-
-    class PhotoViewHolder(private val binding: ItemUnsplashPhotoBinding) :
-        RecyclerView.ViewHolder(binding.root) {
-
-        fun bind(photo: UnsplashPhoto) {
-            binding.apply {
-                Glide.with(itemView)
-                    .load(photo.urls.regular)
-                    .centerCrop()
-                    .transition(DrawableTransitionOptions.withCrossFade())
-                    .error(R.drawable.ic_error)
-                    .into(imageView)
-
-                userNameTextView.text = photo.user.username
-            }
-        }
-    }
 
     companion object {
         private val PHOTO_COMPARATOR = object : DiffUtil.ItemCallback<UnsplashPhoto>() {
@@ -57,4 +40,36 @@ class UnsplashPhotoAdaptor :
         }
     }
 
+    inner class PhotoViewHolder(private val binding: ItemUnsplashPhotoBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+
+        init {
+            binding.root.setOnClickListener {
+                val currentPosition = bindingAdapterPosition
+                if (currentPosition != RecyclerView.NO_POSITION) {
+                    val item = getItem(currentPosition)
+                    if (item != null) {
+                        listener.onItemClick(photo = item)
+                    }
+                }
+            }
+        }
+
+        fun bind(photo: UnsplashPhoto) {
+            binding.apply {
+                Glide.with(itemView)
+                    .load(photo.urls.regular)
+                    .centerCrop()
+                    .transition(DrawableTransitionOptions.withCrossFade())
+                    .error(R.drawable.ic_error)
+                    .into(imageView)
+
+                userNameTextView.text = photo.user.username
+            }
+        }
+    }
+
+    interface OnItemClickListener {
+        fun onItemClick(photo: UnsplashPhoto)
+    }
 }
