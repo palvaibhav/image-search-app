@@ -25,7 +25,10 @@ class GalleryFragment : Fragment(R.layout.fragment_gallery) {
 
         binding.apply {
             recyclerView.setHasFixedSize(true)
-            recyclerView.adapter = adaptor
+            recyclerView.adapter = adaptor.withLoadStateHeaderAndFooter(
+                header = UnsplashPhotoLoadStateAdapter { adaptor.retry() },
+                footer = UnsplashPhotoLoadStateAdapter { adaptor.retry() }
+            )
         }
 
         viewModel.photos.observe(viewLifecycleOwner) {
