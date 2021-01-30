@@ -4,4 +4,6 @@
     <dimen name="eight_dp">8dp</dimen>
     <dimen name="forty_dp">40dp</dimen>
     <dimen name="two_fifty_dp">250dp</dimen>
+
+    <dimen name="twenty_sp">20sp</dimen>
 </resources>
